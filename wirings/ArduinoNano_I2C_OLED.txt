@@ -1,0 +1,5 @@
+ArduinoNano OLED Screen
+VCC -> 3V3
+SDA -> A4
+SCL -> A5
+GND -> GND (Optional)
