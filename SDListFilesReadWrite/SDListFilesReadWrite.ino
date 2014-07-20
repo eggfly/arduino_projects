@@ -1,7 +1,7 @@
 /*
-  SD card read/write
+  SD card basic file example
  
- This example shows how to read and write data to and from an SD card file 	
+ This example shows how to create and destroy an SD card file 	
  The circuit:
  * SD card attached to SPI bus as follows:
  ** MOSI - pin 11
@@ -17,14 +17,15 @@
  This example code is in the public domain.
  	 
  */
- 
 #include <SD.h>
+#define BLOCK 512
 
+File root;
 File myFile;
 
 void setup()
 {
- // Open serial communications and wait for port to open:
+  // Open serial communications and wait for port to open:
   Serial.begin(9600);
    while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
@@ -36,36 +37,86 @@ void setup()
   // Note that even if it's not used as the CS pin, the hardware SS pin 
   // (10 on most Arduino boards, 53 on the Mega) must be left as an output 
   // or the SD library functions will not work. 
-   pinMode(10, OUTPUT);
-   
+  pinMode(10, OUTPUT);
+
   if (!SD.begin(4)) {
     Serial.println("initialization failed!");
     return;
   }
   Serial.println("initialization done.");
+
+  root = SD.open("/");
   
-  // open the file. note that only one file can be open at a time,
+  printDirectory(root, 0);
+  
+  Serial.println("done!");
+  
+    // open the file. note that only one file can be open at a time,
   // so you have to close this one before opening another.
-  // re-open the file for reading:
-  myFile = SD.open("PUTTY.exe");
+  myFile = SD.open("test.txt", FILE_WRITE);
+  
+  // if the file opened okay, write to it:
   if (myFile) {
-    Serial.println("iToolsSetup_1.8.4.0.zip");
+    Serial.print("Writing to test.txt...");
+    myFile.println("testing 1, 2, 3.");
+	// close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+  // re-open the file for reading:
+  myFile = SD.open("HYPER.RAR");
+  if (myFile) {
+    Serial.println("HYPER.RAR:");
+    long count = 0;
+    char buf[BLOCK];
+    
     // read from the file until there's nothing else in it:
     while (myFile.available()) {
-        myFile.read();
-    	Serial.write("r");
+        long c = myFile.read(buf, BLOCK);
+        count += c;
+    	Serial.println(count);
+//        if (count > BLOCK * 100l) break;
     }
     // close the file:
     myFile.close();
+    Serial.println("read done.");
   } else {
   	// if the file didn't open, print an error:
     Serial.println("error opening test.txt");
   }
+
 }
 
 void loop()
 {
-	// nothing happens after setup
+  // nothing happens after setup finishes.
 }
 
+void printDirectory(File dir, int numTabs) {
+   while(true) {
+     
+     File entry =  dir.openNextFile();
+     if (! entry) {
+       // no more files
+       //Serial.println("**nomorefiles**");
+       break;
+     }
+     for (uint8_t i=0; i<numTabs; i++) {
+       Serial.print('\t');
+     }
+     Serial.print(entry.name());
+     if (entry.isDirectory()) {
+       Serial.println("/");
+       printDirectory(entry, numTabs+1);
+     } else {
+       // files have sizes, directories do not
+       Serial.print("\t\t");
+       Serial.println(entry.size(), DEC);
+     }
+     entry.close();
+   }
+}
 
