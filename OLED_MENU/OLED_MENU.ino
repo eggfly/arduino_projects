@@ -1,6 +1,5 @@
 #include <U8glib.h>
 
-// U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
 #define MENU_ITEMS 4
 char *menu_strings[MENU_ITEMS] = { 
@@ -36,6 +35,4 @@ void loop() {
   while( u8g.nextPage() );
   delay(1000);
 }
-
-
 
