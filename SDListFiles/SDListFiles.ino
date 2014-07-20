@@ -20,6 +20,7 @@
 #include <SD.h>
 
 File root;
+File myFile;
 
 void setup()
 {
@@ -57,14 +58,14 @@ void setup()
 
   // if the file opened okay, write to it:
   if (myFile) {
-    Serial.print("Writing to test.txt...");
+    Serial.print("Writing to test2.txt...");
     int i = 0;
-    for (;i<10240;i++){
+    for (;i<1024;i++){
       myFile.println("testing 1, 2, 3.");
     }
     // close the file:
     myFile.close();
-    Serial.println("done.");
+    Serial.println("Write done.");
   } 
   else {
     // if the file didn't open, print an error:
@@ -82,6 +83,7 @@ void setup()
     }
     // close the file:
     myFile.close();
+    Serial.println("Read done.");
   } 
   else {
     // if the file didn't open, print an error:
