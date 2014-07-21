@@ -7,42 +7,34 @@
  */
 #include <SD.h>
 #include <U8glib.h>
+#include <MemoryFree.h>
 
-#define BLOCK 10
+#define HEIGHT 36
+#define WIDTH_COUNT 10
+#define SIZE (HEIGHT*WIDTH_COUNT)
 long count = 0;
-char buf[BLOCK];
+char buf[SIZE];
 
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
 
 File root;
 File myFile;
-int pos = 5;
 boolean finish = false;
 
-const uint8_t man_bitmap[] PROGMEM = {
-  0x18,         // 00011000
-  0x24,         // 00100100
-  0x24,         // 00100100
-  0x18,         // 00011000
-  0x10,         // 00010000
-  0x28,         // 00101000
-  0x54,         // 01010100
-  0x10,         // 00010000
-  0x28,         // 00101000
-  0x44,         // 01000100
-};
-
 void draw() {
-  u8g.drawBitmapP(56, 40 + pos, 1, 10, man_bitmap);
+  //  u8g.drawBitmapP(56, 40 + pos, 1, 10, man_bitmap);
+  u8g.drawBitmap(16, 16, WIDTH_COUNT, HEIGHT, (const uint8_t*)buf);
 }
 
 void setup()
 {
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
-  
+
   Serial.print("START!!!");
-  while (Serial.read() <= 0) {}
+  //  while (Serial.read() <= 0) {
+  //  }
+  delay(3000);
 
   Serial.print("Initializing SD card...");
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
@@ -57,12 +49,25 @@ void setup()
   }
   Serial.println("initialization done.");
 
+  // testPrintDir();
+  // writeTest();
+
+  Serial.print("free mem: ");
+  Serial.println(freeMemory());
+  readTest();
+}
+
+void testPrintDir() {
   root = SD.open("/");
   printDirectory(root, 0);
   Serial.println("done!");
+}
 
-  // writeTest();
-  readTest();
+void readTest() {
+  myFile = SD.open("HYPER.RAR");
+  if (myFile) {
+    Serial.println("HYPER.RAR:");
+  }
 }
 
 void writeTest() {
@@ -84,6 +89,7 @@ void writeTest() {
   }
 }
 
+
 void loop()
 {
   u8g.firstPage();
@@ -91,21 +97,22 @@ void loop()
     draw();
   }
   while( u8g.nextPage() );
-  pos = -pos;
 
   if  (myFile && myFile.available() && !finish) {
     // read from the file until there's nothing else in it:
-    long c = myFile.read(buf, BLOCK);
+    long c = myFile.read(buf, SIZE);
     count += c;
-    Serial.println(count);
-    if (count > BLOCK * 100l) {
-      // close the file:
-      myFile.close();
-      finish = true;
-      Serial.println("read done.");
-    }
+    // Serial.println(count);
+    /*
+    if (count > SIZE * 1000l) {
+     // close the file:
+     myFile.close();
+     finish = true;
+     Serial.println("read done.");
+     }
+     */
   }
-  delay(1000);
+  //  delay(1000);
 }
 
 void printDirectory(File dir, int numTabs) {
