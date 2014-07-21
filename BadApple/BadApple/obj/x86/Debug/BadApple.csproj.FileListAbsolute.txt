@@ -1,0 +1,4 @@
+C:\Users\eggfly\Documents\Visual Studio 2010\Projects\BadApple\BadApple\bin\Debug\BadApple.exe
+C:\Users\eggfly\Documents\Visual Studio 2010\Projects\BadApple\BadApple\bin\Debug\BadApple.pdb
+C:\Users\eggfly\Documents\Visual Studio 2010\Projects\BadApple\BadApple\obj\x86\Debug\BadApple.exe
+C:\Users\eggfly\Documents\Visual Studio 2010\Projects\BadApple\BadApple\obj\x86\Debug\BadApple.pdb

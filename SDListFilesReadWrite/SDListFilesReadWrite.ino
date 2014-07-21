@@ -9,21 +9,35 @@
 #include <U8glib.h>
 #include <MemoryFree.h>
 
-#define HEIGHT 36
-#define WIDTH_COUNT 10
+// 1440:1080 = 11:8 ~ 12:8 = 3:2
+// 10,36 -> 80:36 = 20:9
+// 9,48 -> 72:48 = 3:2
+// 9,42 -> 72:42 = 12:7
+// 9,45 -> 72:45 = 8:5
+// 8,42 -> 64:42 ~ 32:21
+// 6,32 -> 48:32 = 24:16 = 3:2
+// 1835 frames -> 4'33 = 273
+// 3'39 = 219
+#define WIDTH_COUNT 8
+#define HEIGHT 42
+// max: 36 * 10 = 360
 #define SIZE (HEIGHT*WIDTH_COUNT)
 long count = 0;
 char buf[SIZE];
+int left = 0, top = 0;
 
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
+
+char timeStr[10] = "time";
 
 File root;
 File myFile;
 boolean finish = false;
 
 void draw() {
-  //  u8g.drawBitmapP(56, 40 + pos, 1, 10, man_bitmap);
-  u8g.drawBitmap(16, 16, WIDTH_COUNT, HEIGHT, (const uint8_t*)buf);
+  u8g.drawBitmap(left, top, WIDTH_COUNT, HEIGHT, (const uint8_t*)buf);
+  u8g.setFont(u8g_font_6x12);
+  u8g.drawStr(10, 10, timeStr);
 }
 
 void setup()
@@ -34,7 +48,6 @@ void setup()
   Serial.print("START!!!");
   //  while (Serial.read() <= 0) {
   //  }
-  delay(3000);
 
   Serial.print("Initializing SD card...");
   // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
@@ -55,8 +68,15 @@ void setup()
   Serial.print("free mem: ");
   Serial.println(freeMemory());
   readTest();
+  calcArea();
 }
 
+void calcArea() {
+  top = (64 - HEIGHT) / 2;
+  left = (128 - WIDTH_COUNT * 8) / 2;
+  if (top < 17) top = 17;
+  if (left < 0) left = 0;
+}
 void testPrintDir() {
   root = SD.open("/");
   printDirectory(root, 0);
@@ -64,9 +84,10 @@ void testPrintDir() {
 }
 
 void readTest() {
-  myFile = SD.open("HYPER.RAR");
+  char filename[] = "64x42.bin";
+  myFile = SD.open(filename);
   if (myFile) {
-    Serial.println("HYPER.RAR:");
+    Serial.println(filename);
   }
 }
 
@@ -101,8 +122,10 @@ void loop()
   if  (myFile && myFile.available() && !finish) {
     // read from the file until there's nothing else in it:
     long c = myFile.read(buf, SIZE);
-    count += c;
+    // count += c;
     // Serial.println(count);
+    unsigned long ms = millis();
+    dtostrf(ms/1000.0,1,2,timeStr);
     /*
     if (count > SIZE * 1000l) {
      // close the file:
@@ -111,8 +134,10 @@ void loop()
      Serial.println("read done.");
      }
      */
+  } else {
+    Serial.println("read done.");
   }
-  //  delay(1000);
+  delay(20);
 }
 
 void printDirectory(File dir, int numTabs) {
