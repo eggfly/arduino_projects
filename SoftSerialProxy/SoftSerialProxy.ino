@@ -9,9 +9,9 @@
  
  */
 #include <SoftwareSerial.h>
- 
+
 SoftwareSerial mySerial(2, 3); // RX, TX
- 
+
 void setup()  
 {
   //打开串行通信，等待端口打开：
@@ -19,19 +19,28 @@ void setup()
   while (!Serial) {
     ; // 等待串口连接。Needed for Leonardo only
   }
- 
- 
+
+
   Serial.println("Goodnight moon!");
- 
-  // 设置串口通讯的速率
+
+  // 设置串口通讯的速率38400
   mySerial.begin(9600);
-  mySerial.println("Hello, world?");
+  Serial.println("Hello software serial!");
+  // mySerial.println("Hello, world?");
 }
- 
+
 void loop() // 循环
 {
   if (mySerial.available())
     Serial.write(mySerial.read());
-  if (Serial.available())
-    mySerial.write(Serial.read());
+  if (Serial.available()) {
+    int b = Serial.read();
+    mySerial.write(b);
+    if (b == '\r') {
+      // Serial.print("\\r");
+    } else if (b == '\n') {
+      // Serial.print("\\n");
+    }
+  }
 }
+
