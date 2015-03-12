@@ -29,7 +29,10 @@ void loop() {
     draw();
   }
   while( u8g.nextPage() );
+  handleIR();
   delay(1000);
 }
 
+void handleIR() {
+}
 
