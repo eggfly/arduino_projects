@@ -1,31 +1,11 @@
-/*
-  U8G logo and no acc
-  with uptime and fps screen
- */
-
 #include <U8glib.h>
 #include <SoftwareSerial.h>   //Software Serial Port
-
 #define RxD 2  //for Leonardo：10, bluetooth tx
 #define TxD 3  //for Leonardo：11, bluetooth rx
 
+char incomingByte;  // incoming data
+int  LED = 13;      // LED pin
 SoftwareSerial blueToothSerial(RxD,TxD);
-
-//#include <Wire.h>
-//#include <I2Cdev.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <DS1302.h>
-
-/* 接口定义
- CE(DS1302 pin5) -> Arduino D5
- IO(DS1302 pin6) -> Arduino D6
- SCLK(DS1302 pin7) -> Arduino D7
- */
-uint8_t CE_PIN   = 5;
-uint8_t IO_PIN   = 6;
-uint8_t SCLK_PIN = 7;
-
 const uint8_t cocktail[] PROGMEM = {
   0x0 ,0x0 ,0x0 ,0x7e,0xff,
   0xff,0x0 ,0x0 ,0x0 ,0xff,
@@ -71,7 +51,6 @@ const uint8_t man_bitmap[] PROGMEM = {
   0x28,         // 00101000
   0x44,         // 01000100
 };
-
 char fpsStr[32];
 char uptimeStr[16];
 unsigned long t = 0;
@@ -83,10 +62,10 @@ int ledState = HIGH;
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NO_ACK);
 
 void setup() {
-  // Serial.begin(9600); 
+  Serial.begin(9600); // initialization
+  pinMode(LED, OUTPUT);
+  Serial.println("Hello remote control!");
   blueToothSerial.begin(9600);
-  pinMode(led, OUTPUT);
-  Serial.println("Press 1 to LED ON or 0 to LED OFF...");
 }
 
 void draw() {
@@ -99,22 +78,24 @@ void draw() {
   u8g.drawBitmapP( 106, 35, 1, 10, man_bitmap);
   u8g.drawXBMP( 5, 30, u8g_logo_width, u8g_logo_height, u8g_logo_bits);
 }
-char incomingByte;  // incoming data
-
+void loop (){
+  handleBT();
+  lcd();
+}
 void handleBT() {
   if (blueToothSerial.available() > 0) {  // if the data came
-    incomingByte = Serial.read(); // read byte
+    incomingByte = blueToothSerial.read(); // read byte
     if(incomingByte == '0') {
-      digitalWrite(led, LOW);  // if 1, switch LED Off
+      digitalWrite(LED, LOW);  // if 1, switch LED Off
       blueToothSerial.println("LED OFF. Press 1 to LED ON!");  // print message
     }
     if(incomingByte == '1') {
-      digitalWrite(led, HIGH); // if 0, switch LED on
+      digitalWrite(LED, HIGH); // if 0, switch LED on
       blueToothSerial.println("LED ON. Press 0 to LED OFF!");
     }
   }
 }
-void loop() {
+void lcd() {
   // led
   // digitalWrite(led, ledState);   // turn the LED on (HIGH is the voltage level)
   // ledState = !ledState;
@@ -124,7 +105,6 @@ void loop() {
     draw();
   }
   while( u8g.nextPage() );
-  handleBT();
   // fps and uptime
   unsigned long ms = millis();
   dtostrf(ms/1000.0,1,2,uptimeStr);
@@ -141,6 +121,4 @@ void loop() {
     /* refresh当前时间 */
   }
 }
-
-
 
