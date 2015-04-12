@@ -184,17 +184,8 @@ float sampling(){
 
   // Serial.print(int(ret)); // unit: mg/m3
   // Serial.println(" ug/m3"); // unit: mg/m3
-  Serial.println(dustDensity); // unit: mg/m3
+  Serial.println(dustDensity * 1000.0); // unit: mg/m3
   delay(1000);
   return dustDensity;
 }
-
-
-
-
-
-
-
-
-
 
